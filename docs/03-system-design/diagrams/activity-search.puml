@@ -1,0 +1,56 @@
+
+@startuml
+title AgentLens - Activity Diagram: Search Products
+
+
+skinparam shadowing false
+
+start
+
+:Receive natural-language\nproduct search request;
+
+if (Input valid?) then (Yes)
+  :Retrieve graph schema;
+
+  if (Schema retrieved?) then (Yes)
+    :Send request and schema\nto LLM service;
+    :Generate candidate Cypher query;
+
+    if (Query generated?) then (Yes)
+      :Validate Cypher query;
+
+      if (Query safe and valid?) then (Yes)
+        :Execute read-only query\nwith timeout and result limit;
+
+        if (Execution successful?) then (Yes)
+          :Process query results;
+
+          if (Results found?) then (Yes)
+            :Display product results;
+          else (No)
+            :Display empty-results message;
+          endif
+
+        else (No)
+          :Display controlled execution error;
+        endif
+
+      else (No)
+        :Reject unsafe or invalid query;
+        :Display safe error message;
+      endif
+
+    else (No)
+      :Display query-generation error;
+    endif
+
+  else (No)
+    :Display schema retrieval error;
+  endif
+
+else (No)
+  :Display input validation message;
+endif
+
+stop
+@enduml
